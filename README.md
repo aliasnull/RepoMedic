@@ -1,6 +1,6 @@
 # RepoMedic 🩺
 
-[![CI](https://github.com/repomedic/repomedic/actions/workflows/ci.yml/badge.svg)](https://github.com/repomedic/repomedic/actions/workflows/ci.yml)
+[![CI](https://github.com/aliasnull/RepoMedic/actions/workflows/ci.yml/badge.svg)](https://github.com/aliasnull/RepoMedic/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python: 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](pyproject.toml)
 
@@ -42,7 +42,7 @@ Modern software repositories often break in CI or leak credentials due to subtle
 Clone the repository and install RepoMedic locally:
 
 ```bash
-git clone https://github.com/your-org/repomedic.git
+git clone https://github.com/aliasnull/RepoMedic.git
 cd repomedic
 pip install -e .
 ```
@@ -159,7 +159,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run RepoMedic
-        uses: repomedic/repomedic@v1
+        uses: aliasnull/RepoMedic@v1
         with:
           path: '.'
           format: 'github'
