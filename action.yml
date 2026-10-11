@@ -1,0 +1,37 @@
+name: 'RepoMedic Repository Diagnostics'
+description: 'Fast, offline-first repository health, configuration, and security diagnostics'
+author: 'RepoMedic Contributors'
+branding:
+  icon: 'check-circle'
+  color: 'green'
+
+inputs:
+  path:
+    description: 'Path to the repository or directory to scan'
+    required: false
+    default: '.'
+  format:
+    description: 'Output format: console, json, or github'
+    required: false
+    default: 'github'
+  fail-on:
+    description: 'Failure threshold to trigger non-zero exit code: error, warning, or none'
+    required: false
+    default: 'error'
+  python-version:
+    description: 'Python version to use if setting up Python'
+    required: false
+    default: '3.11'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Run RepoMedic Diagnostics
+      shell: bash
+      run: |
+        python3 -m repomedic scan "${{ inputs.path }}" --format "${{ inputs.format }}" --fail-on "${{ inputs.fail-on }}"
