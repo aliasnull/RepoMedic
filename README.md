@@ -8,6 +8,22 @@
 
 ---
 
+## ❓ The Problem RepoMedic Solves
+
+Modern software repositories often break in CI or leak credentials due to subtle oversights:
+- **Missing or unpinned dependencies:** Causing non-deterministic deployment failures.
+- **Accidental secret exposure:** Staged or committed `.env` files, API keys, or private keys.
+- **Configuration omissions:** Missing `.gitignore`, licenses, or compiler configs (`tsconfig.json`).
+- **Heavy or SaaS-dependent linters:** Many diagnostic tools require Docker, Node.js plus Python runtimes, external API keys, or paid subscriptions.
+
+**RepoMedic solves this by being:**
+1. **Offline-First:** No outbound network calls. All checks run locally and deterministically.
+2. **Zero Runtime Dependencies:** Pure Python standard library implementation compatible with Python 3.10+.
+3. **Instant:** Scans standard repositories in ~30 milliseconds.
+4. **Context-Aware:** Understands the difference between deployable applications and distributed libraries.
+
+---
+
 ## ✨ Features
 
 - **⚡ Zero Runtime Dependencies:** Built purely on the Python standard library with Python 3.10+ compatibility (using built-in or fallback TOML parsing).
@@ -59,6 +75,9 @@ repomedic scan . --fail-on error
 
 # Fail CI if any warning or error is found
 repomedic scan . --fail-on warning
+
+# Check CLI version
+repomedic --version
 ```
 
 ### Exit Codes
@@ -66,6 +85,36 @@ repomedic scan . --fail-on warning
 - `0`: Scan completed cleanly (or findings were below the `--fail-on` threshold).
 - `1`: Diagnostics reported issues meeting or exceeding the `--fail-on` threshold.
 - `2`: Invalid CLI arguments or non-existent path.
+
+---
+
+## 📊 JSON Output Schema
+
+When `--format json` is specified, RepoMedic produces deterministic, structured output suitable for automated pipelines:
+
+```json
+{
+  "findings": [
+    {
+      "code": "RM001",
+      "message": "Missing .gitignore file",
+      "severity": "WARNING",
+      "file_path": ".gitignore",
+      "line": null,
+      "suggestion": "Add a .gitignore file tailored to your languages and frameworks."
+    }
+  ],
+  "counts": {
+    "ERROR": 0,
+    "WARNING": 1,
+    "INFO": 0
+  },
+  "scanned_files_count": 32,
+  "duration_ms": 28.5,
+  "has_errors": false,
+  "has_warnings": true
+}
+```
 
 ---
 
@@ -95,7 +144,7 @@ repomedic scan . --fail-on warning
 
 ## 🤖 GitHub Actions Integration
 
-Add RepoMedic to your workflow (`.github/workflows/diagnostics.yml`):
+Use RepoMedic directly in your GitHub Actions workflows via the composite action ([`action.yml`](action.yml)):
 
 ```yaml
 name: Diagnostics
@@ -106,23 +155,46 @@ jobs:
   repomedic:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: repomedic/repomedic@v1
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run RepoMedic
+        uses: repomedic/repomedic@v1
         with:
           path: '.'
           format: 'github'
           fail-on: 'error'
+          python-version: '3.11'
 ```
+
+### Action Inputs
+
+| Input | Description | Default |
+| :--- | :--- | :--- |
+| `path` | Path to repository or directory to scan | `.` |
+| `format` | Output format (`console`, `json`, `github`) | `github` |
+| `fail-on` | Failure threshold (`error`, `warning`, `none`) | `error` |
+| `python-version` | Python version for the setup step | `3.11` |
 
 ---
 
-## 🧪 Running Tests
+## ⚠️ Limitations (v1 Scope)
 
-Run the test suite using `pytest`:
+- **Static & Offline Only:** RepoMedic does not make outbound network queries to online vulnerability databases (e.g., OSV, CVE, NVD).
+- **Rule-Based:** Secret detection uses regex patterns and known file indicators rather than full semantic analysis.
+- **No Web Dashboard:** v1 is intentionally designed as a lightweight CLI and CI tool without a web UI or background daemon.
 
-```bash
-pytest -v
-```
+---
+
+## 🤝 Contributing
+
+Contributions are welcome!
+
+1. Fork and clone the repository.
+2. Install test dependencies: `pip install pytest`.
+3. Run the automated test suite: `pytest -v`.
+4. Ensure new rules follow the existing `BaseScanner` interface and include tests.
+5. Submit a pull request.
 
 ---
 
