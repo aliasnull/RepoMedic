@@ -188,13 +188,15 @@ jobs:
 
 ## 🤝 Contributing
 
-Contributions are welcome!
+Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for full developer setup instructions, scanner guidelines, and pull request procedures.
 
-1. Fork and clone the repository.
-2. Install test dependencies: `pip install pytest`.
+1. Fork and clone the repository (`git clone https://github.com/aliasnull/RepoMedic.git && cd RepoMedic`).
+2. Install in editable mode with test dependencies: `pip install -e ".[dev]"`.
 3. Run the automated test suite: `pytest -v`.
 4. Ensure new rules follow the existing `BaseScanner` interface and include tests.
-5. Submit a pull request.
+5. Submit a pull request following our [Pull Request Template](.github/PULL_REQUEST_TEMPLATE.md).
+
+For vulnerability disclosure, please see our [Security Policy](SECURITY.md). All contributors are expected to uphold our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ---
 

@@ -1,0 +1,89 @@
+name: Bug Report
+description: Report unexpected behavior, false positives, or diagnostic crashes in RepoMedic
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting an issue! Please provide as much detail as possible to help reproduce and resolve it.
+        *Note: If reporting a security vulnerability or sensitive secret pattern issue, please see [SECURITY.md](../../SECURITY.md).*
+
+  - type: input
+    id: version
+    attributes:
+      label: RepoMedic Version
+      description: What version of RepoMedic are you running? (Run `repomedic --version`)
+      placeholder: "e.g. repomedic 0.1.1"
+    validations:
+      required: true
+
+  - type: input
+    id: python-version
+    attributes:
+      label: Python Version
+      description: What Python version are you using? (Run `python3 --version`)
+      placeholder: "e.g. Python 3.11.8"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating System
+      options:
+        - Linux (Ubuntu, Debian, Fedora, etc.)
+        - macOS
+        - Windows
+        - Other / CI Container
+    validations:
+      required: true
+
+  - type: dropdown
+    id: execution-context
+    attributes:
+      label: Execution Context
+      options:
+        - CLI (`repomedic scan ...`)
+        - GitHub Actions Composite Action (`aliasnull/RepoMedic@...`)
+        - Python module (`python3 -m repomedic ...`)
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction Steps & Command
+      description: Describe the exact steps or command run to reproduce the issue.
+      placeholder: |
+        1. Run `repomedic scan . --format github`
+        2. Repository has file `...`
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior & Output
+      description: What happened instead? Include terminal output or stack trace if applicable.
+      render: shell
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Confirmation
+      options:
+        - label: I verified that this is not a duplicate of an existing issue.
+          required: true
+        - label: This report does not contain sensitive tokens, API keys, or proprietary data.
+          required: true

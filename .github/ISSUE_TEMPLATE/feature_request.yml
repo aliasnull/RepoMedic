@@ -1,0 +1,63 @@
+name: Feature Request / Rule Proposal
+description: Suggest a new diagnostic rule, enhancement, or feature for RepoMedic
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for proposing an enhancement or new diagnostic rule for RepoMedic!
+        RepoMedic adheres strictly to an offline-first, zero-runtime-dependency design.
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Feature Category
+      options:
+        - New Diagnostic Rule (RMxxx)
+        - Scanner Enhancement (Python / JS / Repo)
+        - CLI / Reporter Enhancement
+        - GitHub Action Enhancement
+        - Documentation / Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or Motivation
+      description: What problem does this solve, or what repository misconfiguration does this catch?
+      placeholder: "Developers often forget to configure ... which leads to ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Solution or Rule Logic
+      description: Describe the proposed behavior, suggested rule code/severity (if applicable), and recommended fix message.
+      placeholder: |
+        Proposed Rule Code: RM106
+        Severity: WARNING
+        Condition: When pyproject.toml defines ...
+        Fix suggestion: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Are there alternative approaches or existing tools that address this?
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: guidelines
+    attributes:
+      label: Design Constraints Checklist
+      options:
+        - label: The proposed change does not require external network requests or third-party runtime dependencies.
+          required: true
+        - label: I searched existing issues and feature requests to verify this is not a duplicate.
+          required: true

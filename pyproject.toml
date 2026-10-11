@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "repomedic"
-version = "0.1.0"
+version = "0.1.1"
 description = "Open-source repository diagnostics toolkit"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -27,6 +27,11 @@ classifiers = [
 ]
 dependencies = []
 
+[project.urls]
+Homepage = "https://github.com/aliasnull/RepoMedic"
+Repository = "https://github.com/aliasnull/RepoMedic"
+Issues = "https://github.com/aliasnull/RepoMedic/issues"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0.0",
@@ -39,3 +44,7 @@ repomedic = "repomedic.cli:main"
 where = ["."]
 include = ["repomedic*"]
 exclude = ["tests*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

@@ -8,14 +8,14 @@ def test_cli_version(capsys):
         main(["--version"])
     assert exc.value.code == 0
     captured = capsys.readouterr()
-    assert "0.1.0" in captured.out
+    assert "0.1.1" in captured.out
 
 def test_cli_version_short_flag(capsys):
     with pytest.raises(SystemExit) as exc:
         main(["-v"])
     assert exc.value.code == 0
     captured = capsys.readouterr()
-    assert "0.1.0" in captured.out
+    assert "0.1.1" in captured.out
 
 def test_cli_scan_shorthand_path(tmp_path: Path, capsys):
     (tmp_path / ".gitignore").write_text("*.pyc\n")
