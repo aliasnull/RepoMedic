@@ -30,6 +30,6 @@ def test_action_yml_does_not_interpolate_inputs_in_run_script():
 
 def test_readme_action_example_matches_repository():
     readme = Path("README.md").read_text(encoding="utf-8")
-    assert "uses: aliasnull/RepoMedic@v1" in readme
+    assert "uses: aliasnull/RepoMedic@v0.1.1" in readme
     assert "https://github.com/aliasnull/RepoMedic" in readme
     assert "your-org" not in readme
