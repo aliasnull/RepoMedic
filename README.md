@@ -43,7 +43,7 @@ Clone the repository and install RepoMedic locally:
 
 ```bash
 git clone https://github.com/aliasnull/RepoMedic.git
-cd repomedic
+cd RepoMedic
 pip install -e .
 ```
 
@@ -159,7 +159,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run RepoMedic
-        uses: aliasnull/RepoMedic@v1
+        uses: aliasnull/RepoMedic@v0.1.1
         with:
           path: '.'
           format: 'github'
