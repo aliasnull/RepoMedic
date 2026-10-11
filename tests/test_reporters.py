@@ -69,3 +69,28 @@ def test_github_reporter_workflow_commands(tmp_path: Path, monkeypatch):
     summary_content = summary_file.read_text()
     assert "### RepoMedic Diagnostic Summary" in summary_content
     assert "| Error | 1 |" in summary_content
+
+def test_github_reporter_special_character_escaping(tmp_path: Path, monkeypatch):
+    summary_file = tmp_path / "step_summary.md"
+    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary_file))
+    
+    f1 = Finding(
+        code="RM999",
+        message="Message with % and \n newline and | pipe",
+        severity=Severity.ERROR,
+        file_path="src/file.py",
+        suggestion="Fix with a | pipe in suggestion"
+    )
+    result = DiagnosticResult(findings=[f1], scanned_files_count=1)
+    reporter = GitHubReporter()
+    output = reporter.format(result)
+    
+    # Workflow command escaping: % -> %25, \n -> %0A
+    assert "%25" in output
+    assert "%0A" in output
+    assert "\n" not in output
+    
+    # Markdown table escaping: | -> \|
+    summary_content = summary_file.read_text()
+    assert "\\|" in summary_content
+

@@ -166,11 +166,16 @@ class RepoScanner(BaseScanner):
         return False
 
     def _iterate_files(self, root: Path, context: ScanContext) -> Iterable[Path]:
+        resolved_root = root.resolve()
         if context.is_git_repo and context.tracked_files:
             for rel in context.tracked_files:
                 p = root / rel
                 if p.is_file():
-                    yield p
+                    try:
+                        if p.resolve().is_relative_to(resolved_root):
+                            yield p
+                    except (OSError, ValueError):
+                        continue
             return
 
         for p in root.rglob("*"):
@@ -179,7 +184,11 @@ class RepoScanner(BaseScanner):
             parts = p.relative_to(root).parts
             if any(part in IGNORED_DIRS for part in parts):
                 continue
-            yield p
+            try:
+                if p.resolve().is_relative_to(resolved_root):
+                    yield p
+            except (OSError, ValueError):
+                continue
 
     def _check_sensitive_files(self, root: Path, context: ScanContext) -> list[Finding]:
         findings: list[Finding] = []
@@ -218,8 +227,11 @@ class RepoScanner(BaseScanner):
 
             # Skip markdown, tests, minified or non-text
             name_lower = file_path.name.lower()
+            ext_lower = file_path.suffix.lower()
+            is_env_file = name_lower in (".env", ".env.local") or name_lower.startswith(".env.")
+
             if (
-                file_path.suffix.lower() not in TEXT_EXTENSIONS
+                (ext_lower not in TEXT_EXTENSIONS and not is_env_file)
                 or name_lower.startswith("test_")
                 or name_lower.endswith("_test.py")
                 or ".spec." in name_lower

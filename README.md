@@ -51,6 +51,9 @@ repomedic scan . --format json
 # Output GitHub Actions workflow commands and summary
 repomedic scan . --format github
 
+# Run without ANSI colors
+repomedic scan . --no-color
+
 # Fail CI only if errors are found (exit code 1)
 repomedic scan . --fail-on error
 

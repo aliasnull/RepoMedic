@@ -71,6 +71,8 @@ class PythonScanner(BaseScanner):
         ]
         if any((root / f).exists() for f in indicators):
             return True
+        if (root / "requirements").is_dir() and any((root / "requirements").glob("*.txt")):
+            return True
         # Check if any .py files exist (shallow search)
         return any(root.glob("*.py")) or any(root.glob("*/*.py"))
 
@@ -122,8 +124,9 @@ class PythonScanner(BaseScanner):
 
     def _check_requirements_files(self, root: Path, is_app: bool) -> list[Finding]:
         findings: list[Finding] = []
+        req_paths = set(root.glob("requirements*.txt")) | set(root.glob("requirements/*.txt"))
 
-        for req_path in root.glob("requirements*.txt"):
+        for req_path in sorted(req_paths):
             rel_path = str(req_path.relative_to(root)).replace("\\", "/")
             try:
                 lines = req_path.read_text(encoding="utf-8", errors="ignore").splitlines()
@@ -131,16 +134,18 @@ class PythonScanner(BaseScanner):
                 continue
 
             for line_no, raw_line in enumerate(lines, start=1):
-                line = raw_line.strip()
-                if not line or line.startswith("#"):
+                # Strip inline comments
+                line = raw_line.split("#", 1)[0].strip()
+                if not line:
                     continue
 
                 # Insecure HTTP check
                 if "http://" in line:
+                    sanitized = re.sub(r"://([^:@]+):([^@]+)@", "://***:***@", line)
                     findings.append(
                         Finding(
                             code="RM105",
-                            message=f"Insecure plain HTTP package index or URL: {line}",
+                            message=f"Insecure plain HTTP package index or URL: {sanitized}",
                             severity=Severity.ERROR,
                             file_path=rel_path,
                             line=line_no,

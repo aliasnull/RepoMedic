@@ -99,3 +99,33 @@ def test_js_scanner_flags_wildcard_and_insecure_dependencies(tmp_path: Path):
     codes = {f.code for f in findings}
     assert "RM204" in codes  # insecure http URL
     assert "RM205" in codes  # wildcard/latest
+
+def test_js_scanner_redacts_credentials_in_insecure_dependency(tmp_path: Path):
+    pkg_data = {
+        "name": "test-pkg",
+        "dependencies": {
+            "private-dep": "http://token:secret12345@npm.corp.internal/tarball.tgz"
+        }
+    }
+    (tmp_path / "package.json").write_text(json.dumps(pkg_data))
+    
+    ctx = ScanContext(repo_path=tmp_path)
+    scanner = JsScanner()
+    findings = scanner.scan(ctx)
+    
+    insecure = [f for f in findings if f.code == "RM204"]
+    assert len(insecure) == 1
+    assert "secret12345" not in insecure[0].message
+    assert "token:***:***@" in insecure[0].message or "***:***@" in insecure[0].message
+
+def test_js_scanner_detects_tsx_and_modern_extensions(tmp_path: Path):
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "App.tsx").write_text("export const App = () => <div>Hello</div>;")
+    
+    ctx = ScanContext(repo_path=tmp_path)
+    scanner = JsScanner()
+    findings = scanner.scan(ctx)
+    
+    # Missing tsconfig should be flagged on TSX files
+    assert any(f.code == "RM203" for f in findings)
+

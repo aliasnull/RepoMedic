@@ -33,5 +33,7 @@ runs:
 
     - name: Run RepoMedic Diagnostics
       shell: bash
+      env:
+        PYTHONPATH: ${{ github.action_path }}
       run: |
         python3 -m repomedic scan "${{ inputs.path }}" --format "${{ inputs.format }}" --fail-on "${{ inputs.fail-on }}"

@@ -18,6 +18,7 @@ def build_parser() -> argparse.ArgumentParser:
         description="RepoMedic - Open-source repository diagnostics toolkit",
     )
     parser.add_argument(
+        "-v",
         "--version",
         action="version",
         version=f"repomedic {__version__}",

@@ -34,3 +34,8 @@ dev = [
 
 [project.scripts]
 repomedic = "repomedic.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["repomedic*"]
+exclude = ["tests*"]

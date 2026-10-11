@@ -74,12 +74,11 @@ class JsScanner(BaseScanner):
     def _is_js_repo(self, root: Path) -> bool:
         if (root / "package.json").exists():
             return True
-        return (
-            any(root.glob("*.js"))
-            or any(root.glob("*.ts"))
-            or any(root.glob("src/*.js"))
-            or any(root.glob("src/*.ts"))
-        )
+        js_patterns = ("*.js", "*.jsx", "*.ts", "*.tsx", "*.mjs", "*.cjs")
+        for pat in js_patterns:
+            if any(root.glob(pat)) or any(root.glob(f"src/{pat}")):
+                return True
+        return False
 
     def _check_lockfiles(self, root: Path, pkg_data: dict[str, Any]) -> list[Finding]:
         findings: list[Finding] = []
@@ -135,10 +134,12 @@ class JsScanner(BaseScanner):
                 ver_clean = ver.strip()
 
                 if ver_clean.startswith("http://"):
+                    import re
+                    sanitized = re.sub(r"://([^:@]+):([^@]+)@", "://***:***@", ver_clean)
                     findings.append(
                         Finding(
                             code="RM204",
-                            message=f"Insecure plain HTTP dependency URL for '{name}': {ver_clean}",
+                            message=f"Insecure plain HTTP dependency URL for '{name}': {sanitized}",
                             severity=Severity.ERROR,
                             file_path="package.json",
                             suggestion="Use secure HTTPS URLs or standard package registry versions.",
@@ -162,10 +163,10 @@ class JsScanner(BaseScanner):
         findings: list[Finding] = []
         has_ts = False
 
-        for ext in ("*.ts", "*.tsx"):
+        for ext in ("*.ts", "*.tsx", "*.mts", "*.cts"):
             for p in root.rglob(ext):
                 parts = p.parts
-                if any(ignored in parts for ignored in ("node_modules", "dist", "build", ".next")):
+                if any(ignored in parts for ignored in (".git", "node_modules", "dist", "build", ".next")):
                     continue
                 has_ts = True
                 break

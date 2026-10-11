@@ -112,3 +112,20 @@ def test_repo_scanner_ignores_secret_placeholders(tmp_path: Path):
     
     assert not any(f.code == "RM005" for f in findings)
 
+def test_repo_scanner_detects_secrets_inside_env_file(tmp_path: Path):
+    env_file = tmp_path / ".env"
+    env_file.write_text('AWS_SECRET_KEY="AKIA9876543210ABCDEF"\n')
+    
+    ctx = ScanContext(
+        repo_path=tmp_path,
+        is_git_repo=True,
+        tracked_files={".env"}
+    )
+    scanner = RepoScanner()
+    findings = scanner.scan(ctx)
+    
+    # Should flag RM004 (sensitive file tracked) AND RM005 (hardcoded secret detected)
+    codes = {f.code for f in findings}
+    assert "RM004" in codes
+    assert "RM005" in codes
+

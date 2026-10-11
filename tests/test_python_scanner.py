@@ -67,8 +67,8 @@ def test_python_scanner_context_aware_lockfile_does_not_error_for_library(tmp_pa
     scanner = PythonScanner()
     findings = scanner.scan(ctx)
     
-    # Should NOT have an ERROR or high-severity warning for missing lockfile on a library
-    assert not any(f.code == "RM101" and f.severity == Severity.ERROR for f in findings)
+    # Should NOT emit RM101 for a library
+    assert not any(f.code == "RM101" for f in findings)
 
 def test_python_scanner_recommends_requires_python_when_missing(tmp_path: Path):
     (tmp_path / "pyproject.toml").write_text("""
@@ -83,3 +83,30 @@ def test_python_scanner_recommends_requires_python_when_missing(tmp_path: Path):
     py_ver_findings = [f for f in findings if f.code == "RM104"]
     assert len(py_ver_findings) == 1
     assert py_ver_findings[0].severity == Severity.INFO
+
+def test_python_scanner_handles_inline_comments_and_nested_requirements(tmp_path: Path):
+    req_dir = tmp_path / "requirements"
+    req_dir.mkdir()
+    (req_dir / "prod.txt").write_text("requests # http library\nurllib3>=1.26.0 # connection pool\n")
+    
+    ctx = ScanContext(repo_path=tmp_path)
+    scanner = PythonScanner()
+    findings = scanner.scan(ctx)
+    
+    unpinned = [f for f in findings if f.code == "RM102"]
+    assert len(unpinned) == 1
+    assert "requests" in unpinned[0].message
+    assert "prod.txt" in unpinned[0].file_path
+
+def test_python_scanner_redacts_credentials_in_insecure_url(tmp_path: Path):
+    (tmp_path / "requirements.txt").write_text("--extra-index-url http://user:secretpass123@internal-repo.corp/simple\n")
+    
+    ctx = ScanContext(repo_path=tmp_path)
+    scanner = PythonScanner()
+    findings = scanner.scan(ctx)
+    
+    insecure = [f for f in findings if f.code == "RM105"]
+    assert len(insecure) == 1
+    assert "secretpass123" not in insecure[0].message
+    assert "user:***:***@" in insecure[0].message or "***:***@" in insecure[0].message
+

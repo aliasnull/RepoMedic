@@ -6,6 +6,16 @@ from repomedic.core.models import DiagnosticResult, Severity
 from repomedic.reporters.base import BaseReporter
 
 
+def _escape_workflow_data(val: str) -> str:
+    """Escape data for GitHub Actions workflow command message."""
+    return val.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+
+
+def _escape_markdown_table_cell(val: str) -> str:
+    """Escape data for GitHub Step Summary Markdown table cell."""
+    return val.replace("|", "\\|").replace("\r\n", "<br>").replace("\n", "<br>")
+
+
 class GitHubReporter(BaseReporter):
     def format(self, result: DiagnosticResult) -> str:
         lines: list[str] = []
@@ -26,7 +36,8 @@ class GitHubReporter(BaseReporter):
             params.append(f"title={f.code}")
 
             param_str = f" {','.join(params)}" if params else ""
-            lines.append(f"::{cmd}{param_str}::{f.message}")
+            escaped_msg = _escape_workflow_data(f.message)
+            lines.append(f"::{cmd}{param_str}::{escaped_msg}")
 
         # Also write GITHUB_STEP_SUMMARY if available
         summary_env = os.environ.get("GITHUB_STEP_SUMMARY")
@@ -52,10 +63,15 @@ class GitHubReporter(BaseReporter):
                         if f.line:
                             loc += f":{f.line}"
                         sug = f.suggestion or "-"
-                        summary_md.append(f"| {f.code} | {f.severity.value} | `{loc}` | {f.message} | {sug} |")
+                        safe_msg = _escape_markdown_table_cell(f.message)
+                        safe_sug = _escape_markdown_table_cell(sug)
+                        safe_loc = _escape_markdown_table_cell(loc)
+                        summary_md.append(
+                            f"| {f.code} | {f.severity.value} | `{safe_loc}` | {safe_msg} | {safe_sug} |"
+                        )
 
-                with summary_path.open("a", encoding="utf-8") as f:
-                    f.write("\n".join(summary_md) + "\n")
+                with summary_path.open("a", encoding="utf-8") as out:
+                    out.write("\n".join(summary_md) + "\n")
             except Exception:
                 pass
 

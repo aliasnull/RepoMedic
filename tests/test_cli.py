@@ -10,6 +10,24 @@ def test_cli_version(capsys):
     captured = capsys.readouterr()
     assert "0.1.0" in captured.out
 
+def test_cli_version_short_flag(capsys):
+    with pytest.raises(SystemExit) as exc:
+        main(["-v"])
+    assert exc.value.code == 0
+    captured = capsys.readouterr()
+    assert "0.1.0" in captured.out
+
+def test_cli_scan_shorthand_path(tmp_path: Path, capsys):
+    (tmp_path / ".gitignore").write_text("*.pyc\n")
+    (tmp_path / "README.md").write_text("# Test\n")
+    (tmp_path / "LICENSE").write_text("MIT\n")
+    
+    # Invoking with just the path argument (implicit scan)
+    exit_code = main([str(tmp_path), "--no-color"])
+    assert exit_code == 0
+    captured = capsys.readouterr()
+    assert "All repository diagnostics passed" in captured.out
+
 def test_cli_scan_clean_dir(tmp_path: Path, capsys):
     # Setup clean repo
     (tmp_path / ".gitignore").write_text("*.pyc\n")

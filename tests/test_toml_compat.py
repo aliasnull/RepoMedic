@@ -42,3 +42,18 @@ def test_minimal_toml_fallback_parser():
     assert data["package"]["enabled"] is True
     assert data["package"]["count"] == 42
     assert data["package"]["meta"]["authors"] == ["Alice", "Bob"]
+
+def test_toml_compat_fallback_when_tomllib_is_none(monkeypatch):
+    import repomedic.core.toml_compat as tc
+    monkeypatch.setattr(tc, "tomllib", None)
+    
+    content = """
+    [project]
+    name = "pure-py310"
+    version = "1.0.0"
+    dependencies = ["requests>=2.0.0"]
+    """
+    data = tc.loads(content)
+    assert data["project"]["name"] == "pure-py310"
+    assert data["project"]["dependencies"] == ["requests>=2.0.0"]
+

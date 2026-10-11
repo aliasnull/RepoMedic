@@ -26,3 +26,15 @@ def test_engine_git_integration(tmp_path: Path):
     ctx = engine.build_context(tmp_path)
     assert ctx.repo_path == tmp_path
     assert isinstance(ctx.tracked_files, set)
+
+def test_engine_handles_git_failure(tmp_path: Path, monkeypatch):
+    import subprocess
+    def failing_run(*args, **kwargs):
+        raise OSError("git not found")
+    
+    monkeypatch.setattr(subprocess, "run", failing_run)
+    engine = ScanEngine()
+    ctx = engine.build_context(tmp_path)
+    assert ctx.is_git_repo is False
+    assert ctx.tracked_files == set()
+

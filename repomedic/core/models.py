@@ -63,7 +63,9 @@ class ScanContext:
     tracked_files: set[str] = field(default_factory=set)
 
     def is_tracked(self, rel_path: str) -> bool:
-        norm = rel_path.replace("\\", "/").strip("./")
+        norm = rel_path.replace("\\", "/")
+        while norm.startswith("./"):
+            norm = norm[2:]
         return norm in self.tracked_files
 
 

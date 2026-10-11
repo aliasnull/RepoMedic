@@ -45,8 +45,16 @@ def test_diagnostic_result_properties():
     assert len(warns_and_errors) == 2
 
 def test_scan_context_git_tracking(tmp_path: Path):
-    ctx = ScanContext(repo_path=tmp_path, is_git_repo=True, tracked_files={"src/main.py", "README.md"})
+    ctx = ScanContext(
+        repo_path=tmp_path,
+        is_git_repo=True,
+        tracked_files={"src/main.py", "README.md", ".env", ".gitignore", ".github/workflows/ci.yml"}
+    )
     assert ctx.is_tracked("src/main.py") is True
+    assert ctx.is_tracked("./src/main.py") is True
+    assert ctx.is_tracked(".env") is True
+    assert ctx.is_tracked("./.env") is True
+    assert ctx.is_tracked(".gitignore") is True
     assert ctx.is_tracked("secret.env") is False
 
 def test_base_scanner_subclass():
