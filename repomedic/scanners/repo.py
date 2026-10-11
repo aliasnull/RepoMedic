@@ -87,6 +87,11 @@ SECRET_PATTERNS = [
     ),
 ]
 
+# Documented example credentials that should not be treated as leaked secrets
+DOCUMENTED_EXAMPLE_CREDENTIALS = {
+    "AKIAIOSFODNN7EXAMPLE",
+}
+
 # Exclusions to prevent false positives on documentation / placeholders
 PLACEHOLDER_REGEX = re.compile(
     r"(?i)(example|placeholder|dummy|changeme|fake|mock|your_key|test_token)"
@@ -250,12 +255,12 @@ class RepoScanner(BaseScanner):
                 continue
 
             for line_no, line in enumerate(content.splitlines(), start=1):
-                if PLACEHOLDER_REGEX.search(line):
-                    # Skip common examples/placeholders
-                    continue
-
+                found_secret = False
                 for secret_type, regex in SECRET_PATTERNS:
-                    if regex.search(line):
+                    for match in regex.finditer(line):
+                        candidate = match.group(0)
+                        if candidate in DOCUMENTED_EXAMPLE_CREDENTIALS:
+                            continue
                         findings.append(
                             Finding(
                                 code="RM005",
@@ -266,6 +271,9 @@ class RepoScanner(BaseScanner):
                                 suggestion="Revoke this secret, remove it from code, and load via environment variables.",
                             )
                         )
+                        found_secret = True
                         break  # one finding per line is enough
+                    if found_secret:
+                        break
 
         return findings

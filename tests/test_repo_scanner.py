@@ -129,3 +129,68 @@ def test_repo_scanner_detects_secrets_inside_env_file(tmp_path: Path):
     assert "RM004" in codes
     assert "RM005" in codes
 
+def test_repo_scanner_detects_secret_despite_placeholder_comment(tmp_path: Path):
+    app_file = tmp_path / "app.py"
+    app_file.write_text('AWS_KEY = "AKIA1234567890ABCDEF"  # fake example\n')
+    ctx = ScanContext(
+        repo_path=tmp_path,
+        is_git_repo=True,
+        tracked_files={"app.py"},
+    )
+    scanner = RepoScanner()
+    findings = scanner.scan(ctx)
+
+    secret_findings = [f for f in findings if f.code == "RM005"]
+    assert len(secret_findings) == 1
+    assert secret_findings[0].file_path == "app.py"
+    assert secret_findings[0].line == 1
+
+def test_repo_scanner_ignores_documented_aws_example_key(tmp_path: Path):
+    app_file = tmp_path / "app.py"
+    app_file.write_text('AWS_KEY = "AKIAIOSFODNN7EXAMPLE"\n')
+    ctx = ScanContext(
+        repo_path=tmp_path,
+        is_git_repo=True,
+        tracked_files={"app.py"},
+    )
+    scanner = RepoScanner()
+    findings = scanner.scan(ctx)
+
+    assert not any(f.code == "RM005" for f in findings)
+
+def test_repo_scanner_ordinary_placeholders_produce_no_finding(tmp_path: Path):
+    app_file = tmp_path / "app.py"
+    app_file.write_text(
+        'API_KEY = "YOUR_KEY_HERE"\n'
+        'DB_PASS = "changeme"\n'
+        'TOKEN = "dummy_token"\n'
+        'SECRET = "fake_secret"\n'
+    )
+    ctx = ScanContext(
+        repo_path=tmp_path,
+        is_git_repo=True,
+        tracked_files={"app.py"},
+    )
+    scanner = RepoScanner()
+    findings = scanner.scan(ctx)
+
+    assert not any(f.code == "RM005" for f in findings)
+
+def test_repo_scanner_detects_secret_with_placeholder_substring(tmp_path: Path):
+    app_file = tmp_path / "app.py"
+    app_file.write_text(
+        'AWS_KEY_1 = "AKIADUMMYKEY12345678"\n'
+        'AWS_KEY_2 = "AKIAFAKE1234567890AB"\n'
+        'AWS_KEY_3 = "AKIAMOCK1234567890CD"\n'
+    )
+    ctx = ScanContext(
+        repo_path=tmp_path,
+        is_git_repo=True,
+        tracked_files={"app.py"},
+    )
+    scanner = RepoScanner()
+    findings = scanner.scan(ctx)
+
+    secret_findings = [f for f in findings if f.code == "RM005"]
+    assert len(secret_findings) == 3
+
