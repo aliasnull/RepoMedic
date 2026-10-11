@@ -159,7 +159,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run RepoMedic
-        uses: aliasnull/RepoMedic@v0.1.1
+        uses: aliasnull/RepoMedic@v0.1.2
         with:
           path: '.'
           format: 'github'
