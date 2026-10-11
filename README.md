@@ -1,6 +1,8 @@
 # RepoMedic 🩺
 
 [![CI](https://github.com/aliasnull/RepoMedic/actions/workflows/ci.yml/badge.svg)](https://github.com/aliasnull/RepoMedic/actions/workflows/ci.yml)
+[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-RepoMedic-blue.svg?logo=github)](https://github.com/marketplace/actions/repomedic-repository-diagnostics)
+[![Latest Release](https://img.shields.io/github/v/release/aliasnull/RepoMedic)](https://github.com/aliasnull/RepoMedic/releases/latest)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python: 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](pyproject.toml)
 
