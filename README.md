@@ -180,7 +180,7 @@ jobs:
 
 ---
 
-## ⚠️ Limitations (v1 Scope)
+## ⚠️ Limitations (v0.1 Scope)
 
 - **Static & Offline Only:** RepoMedic does not make outbound network queries to online vulnerability databases (e.g., OSV, CVE, NVD).
 - **Rule-Based:** Secret detection uses regex patterns and known file indicators rather than full semantic analysis.
